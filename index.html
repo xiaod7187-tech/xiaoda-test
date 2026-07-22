@@ -46,12 +46,6 @@
             background: linear-gradient(#7c3aed,#6d28d9); 
             color: white; 
         }
-        .die-btn {
-            background: linear-gradient(#b91c1c, #991b1b);
-            color: white;
-            font-weight: bold;
-            border: 2px solid #f87171;
-        }
         .cum { 
             background: linear-gradient(#db2777,#be185d); 
             color: white; 
@@ -60,10 +54,6 @@
         .start-btn, .finish-btn { 
             background: #a855f7; 
             color: white; 
-        }
-        .record-btn {
-            background: linear-gradient(#dc2626, #b91c1c);
-            color: white;
         }
         .amount { 
             font-size: 52px; 
@@ -85,11 +75,37 @@
             border-radius: 16px; 
             margin: 15px 0; 
         }
+        .progress-container { 
+            width: 100%; 
+            height: 20px; 
+            background: #333; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            margin: 20px 0; 
+        }
+        .progress-bar { 
+            height: 100%; 
+            width: 0%; 
+            background: linear-gradient(to right, #c026d3, #ec4899); 
+            transition: width 0.1s linear; 
+        }
+        .countdown { 
+            font-size: 120px; 
+            font-weight: bold; 
+            color: #f472b6; 
+            margin: 40px 0; 
+            text-shadow: 0 0 30px #ec4899; 
+        }
+        .die-btn {
+            background: linear-gradient(#b91c1c, #991b1b);
+            color: white;
+            font-weight: bold;
+            border: 2px solid #f87171;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 原有页面保持不变 -->
         <div id="disclaimer-screen">
             <h1>🖤小妲的秘密游戏🖤</h1>
             <p><strong>免责声明</strong></p>
@@ -107,14 +123,14 @@
             <button onclick="startRecordingScreen()" class="start-btn">开始游戏</button>
         </div>
 
-        <!-- 新增：录音界面 -->
+        <!-- 新增录音界面 -->
         <div id="recording-screen" style="display:none;">
             <h1>🖤 录音环节 🖤</h1>
             <p><strong>请大声清晰地说出：</strong></p>
             <p style="font-size:22px; color:#f472b6; margin:20px 0;">“我是傻逼”</p>
             
-            <button id="start-record-btn" class="record-btn" onclick="startRecording()">🎤 开始录音</button>
-            <button id="stop-record-btn" class="record-btn" onclick="stopRecording()" style="display:none;">⏹ 停止录音</button>
+            <button id="start-record-btn" class="record-btn" onclick="startRecording()" style="background:linear-gradient(#dc2626,#b91c1c); color:white;">🎤 开始录音</button>
+            <button id="stop-record-btn" class="record-btn" onclick="stopRecording()" style="display:none; background:linear-gradient(#dc2626,#b91c1c); color:white;">⏹ 停止录音</button>
             
             <p id="record-status" style="margin:15px 0; min-height:28px;"></p>
             
@@ -140,7 +156,6 @@
             <button class="cum" onclick="wantCum()">想💦</button>
         </div>
 
-        <!-- 后面部分保持不变（choice-screen、payment 等） -->
         <div id="choice-screen" style="display:none;">
             <h2>现在要？</h2>
             <button onclick="choosePay()" class="cum">支付射精</button>
@@ -185,7 +200,6 @@
         let audioChunks = [];
         let recordedAudioBlob = null;
         let audioUrl = null;
-        let audioPlayer = null;
 
         function showRules() { 
             document.getElementById('disclaimer-screen').style.display = 'none'; 
@@ -231,9 +245,8 @@
 
         function playRecording() {
             if (audioUrl) {
-                if (audioPlayer) audioPlayer.pause();
-                audioPlayer = new Audio(audioUrl);
-                audioPlayer.play();
+                const audio = new Audio(audioUrl);
+                audio.play();
             }
         }
 
@@ -260,11 +273,10 @@
         function fap() { 
             currentAmount += 1; 
             updateAmount();
-            
-            // 每次🦌一下就播放录音
+            // 每次点击🦌播放录音
             if (audioUrl) {
-                const sound = new Audio(audioUrl);
-                sound.play().catch(() => {}); // 防止浏览器阻止自动播放
+                const audio = new Audio(audioUrl);
+                audio.play().catch(() => {});
             }
         }
 
@@ -283,7 +295,6 @@
             document.getElementById('choice-screen').style.display = 'block'; 
         }
 
-        // 下面是原来的功能，保持不变
         function choosePay() { 
             document.getElementById('choice-screen').style.display = 'none'; 
             document.getElementById('payment-screen').style.display = 'block'; 
