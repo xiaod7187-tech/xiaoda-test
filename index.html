@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖤小妲的秘密游戏🖤</title>
+    <style>
+        body { 
+            font-family: system-ui, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            margin: 0; 
+            min-height: 100vh; 
+            background: linear-gradient(rgba(30,10,50,0.75), rgba(20,5,40,0.85)), url('https://i.postimg.cc/13w7pkDJ/Picsart-26-07-13-20-47-11-492.png') center/cover fixed; 
+            color: #f0e0ff; 
+        }
+        .container { 
+            max-width: 420px; 
+            margin: 20px auto; 
+            background: rgba(25,15,45,0.95); 
+            padding: 30px 20px; 
+            border-radius: 24px; 
+            box-shadow: 0 0 40px rgba(160,80,255,0.4); 
+        }
+        h1 { 
+            color: #d8b4fe; 
+            text-shadow: 0 0 20px rgba(192,100,255,0.8); 
+            margin: 10px 0 20px; 
+        }
+        button, .option { 
+            padding: 16px 24px; 
+            margin: 10px; 
+            font-size: 17px; 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            width: 85%; 
+            font-weight: 600; 
+        }
+        .option { 
+            background: rgba(120,60,220,0.25); 
+            border: 2px solid #c4a1ff; 
+            color: #f0e0ff; 
+        }
+        .fap { 
+            background: linear-gradient(#7c3aed,#6d28d9); 
+            color: white; 
+        }
+        .die-btn {
+            background: linear-gradient(#b91c1c, #991b1b);
+            color: white;
+            font-weight: bold;
+            border: 2px solid #f87171;
+        }
+        .cum { 
+            background: linear-gradient(#db2777,#be185d); 
+            color: white; 
+            font-weight: bold; 
+        }
+        .start-btn, .finish-btn { 
+            background: #a855f7; 
+            color: white; 
+        }
+        .record-btn {
+            background: linear-gradient(#dc2626, #b91c1c);
+            color: white;
+        }
+        .amount { 
+            font-size: 52px; 
+            font-weight: bold; 
+            color: #f0bbff; 
+            margin: 10px 0 25px; 
+        }
+        .qr { 
+            max-width: 240px; 
+            margin: 12px auto; 
+            display: block; 
+            border-radius: 12px; 
+            border: 2px solid #c4a1ff; 
+        }
+        .mystery-img { 
+            width: 100%; 
+            max-height: 260px; 
+            object-fit: contain; 
+            border-radius: 16px; 
+            margin: 15px 0; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 原有页面保持不变 -->
+        <div id="disclaimer-screen">
+            <h1>🖤小妲的秘密游戏🖤</h1>
+            <p><strong>免责声明</strong></p>
+            <p>本游戏仅供娱乐，内容为虚构幻想。参与即表示您已年满18岁。</p>
+            <button onclick="showRules()" class="start-btn">我已阅读并同意</button>
+        </div>
+
+        <div id="rules-screen" style="display:none;">
+            <h1>游戏规则</h1>
+            <p>1. 边🦌边点～🖤<br>
+               2. 盯着小妲厚黑脚底板～🖤<br>
+               3. 请在安全、安静的环境下游玩～🖤<br>
+               4. 支付时间只有30秒～🖤<br>
+               5. 寸止休息时间只有10秒～🖤</p>
+            <button onclick="startRecordingScreen()" class="start-btn">开始游戏</button>
+        </div>
+
+        <!-- 新增：录音界面 -->
+        <div id="recording-screen" style="display:none;">
+            <h1>🖤 录音环节 🖤</h1>
+            <p><strong>请大声清晰地说出：</strong></p>
+            <p style="font-size:22px; color:#f472b6; margin:20px 0;">“我是傻逼”</p>
+            
+            <button id="start-record-btn" class="record-btn" onclick="startRecording()">🎤 开始录音</button>
+            <button id="stop-record-btn" class="record-btn" onclick="stopRecording()" style="display:none;">⏹ 停止录音</button>
+            
+            <p id="record-status" style="margin:15px 0; min-height:28px;"></p>
+            
+            <button id="play-test-btn" onclick="playRecording()" style="display:none;">▶ 试听录音</button>
+            <button id="confirm-btn" onclick="confirmRecording()" style="display:none;">✅ 确认使用这个录音</button>
+        </div>
+
+        <div id="start-screen" style="display:none;">
+            <h1>选择初始贡金</h1>
+            <button class="option" onclick="start(0)">0 元</button>
+            <button class="option" onclick="start(18)">18 元</button>
+            <button class="option" onclick="start(38)">38 元</button>
+            <button class="option" onclick="start(48)">48 元</button>
+            <button class="option" onclick="start(58)">58 元</button>
+        </div>
+
+        <div id="game-screen" style="display:none;">
+            <img src="https://i.postimg.cc/13w7pkDJ/Picsart-26-07-13-20-47-11-492.png" class="mystery-img" alt="小妲">
+            <p>当前贡金</p>
+            <div class="amount" id="amount">0</div>
+            <button class="fap" onclick="fap()">🦌 一下 (+1)</button>
+            <button class="die-btn" onclick="dieMom()">死妈 (贡金翻倍)</button>
+            <button class="cum" onclick="wantCum()">想💦</button>
+        </div>
+
+        <!-- 后面部分保持不变（choice-screen、payment 等） -->
+        <div id="choice-screen" style="display:none;">
+            <h2>现在要？</h2>
+            <button onclick="choosePay()" class="cum">支付射精</button>
+            <button onclick="chooseEdge()" class="fap">选择寸止</button>
+        </div>
+
+        <div id="progress-screen" style="display:none;">
+            <h2 id="progress-title">进行中...</h2>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <p id="progress-text">30 秒</p>
+        </div>
+
+        <div id="payment-screen" style="display:none;">
+            <h2>支付倒计时 (30秒)</h2>
+            <div class="progress-container">
+                <div id="pay-progress-bar" class="progress-bar"></div>
+            </div>
+            <p id="pay-progress-text">30 秒</p>
+            <p style="margin:15px 0;color:#f0bbff;">当前贡金： <span id="pay-amount">0</span> 元</p>
+            
+            <p style="margin:20px 0 10px;color:#c4a1ff;">支付宝</p>
+            <img src="https://i.postimg.cc/SNh3sQBR/IMG-20260721-005325.jpg" class="qr">
+            
+            <p style="margin:20px 0 10px;color:#c4a1ff;">微信支付</p>
+            <img src="https://i.postimg.cc/ht4YLyP8/IMG-20260721-005339.png" class="qr">
+            
+            <button onclick="startBigCountdown()" class="finish-btn" style="margin-top:20px;">我已支付</button>
+        </div>
+
+        <div id="countdown-screen" style="display:none;">
+            <h2>射精倒计时</h2>
+            <div class="countdown" id="big-countdown">10</div>
+        </div>
+    </div>
+
+    <script>
+        let currentAmount = 0;
+        let timer;
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordedAudioBlob = null;
+        let audioUrl = null;
+        let audioPlayer = null;
+
+        function showRules() { 
+            document.getElementById('disclaimer-screen').style.display = 'none'; 
+            document.getElementById('rules-screen').style.display = 'block'; 
+        }
+
+        function startRecordingScreen() {
+            document.getElementById('rules-screen').style.display = 'none';
+            document.getElementById('recording-screen').style.display = 'block';
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    audioUrl = URL.createObjectURL(recordedAudioBlob);
+                    document.getElementById('start-record-btn').style.display = 'none';
+                    document.getElementById('stop-record-btn').style.display = 'none';
+                    document.getElementById('play-test-btn').style.display = 'block';
+                    document.getElementById('confirm-btn').style.display = 'block';
+                    document.getElementById('record-status').textContent = '✅ 录音完成！';
+                };
+
+                mediaRecorder.start();
+                document.getElementById('start-record-btn').style.display = 'none';
+                document.getElementById('stop-record-btn').style.display = 'block';
+                document.getElementById('record-status').textContent = '🎤 正在录音... 请说“我是傻逼”';
+            } catch (err) {
+                alert("无法访问麦克风，请允许权限后刷新重试");
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+        }
+
+        function playRecording() {
+            if (audioUrl) {
+                if (audioPlayer) audioPlayer.pause();
+                audioPlayer = new Audio(audioUrl);
+                audioPlayer.play();
+            }
+        }
+
+        function confirmRecording() {
+            if (!recordedAudioBlob) {
+                alert("请先完成录音");
+                return;
+            }
+            document.getElementById('recording-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'block';
+        }
+
+        function start(initial) { 
+            currentAmount = initial; 
+            document.getElementById('start-screen').style.display = 'none'; 
+            document.getElementById('game-screen').style.display = 'block'; 
+            updateAmount(); 
+        }
+
+        function updateAmount() { 
+            document.getElementById('amount').textContent = currentAmount; 
+        }
+
+        function fap() { 
+            currentAmount += 1; 
+            updateAmount();
+            
+            // 每次🦌一下就播放录音
+            if (audioUrl) {
+                const sound = new Audio(audioUrl);
+                sound.play().catch(() => {}); // 防止浏览器阻止自动播放
+            }
+        }
+
+        function dieMom() {
+            if (currentAmount <= 0) {
+                alert("还没开始贡金呢，先🦌几下吧～");
+                return;
+            }
+            currentAmount = Math.floor(currentAmount * 2);
+            updateAmount();
+            alert("恭喜，死妈快乐！");
+        }
+
+        function wantCum() { 
+            document.getElementById('game-screen').style.display = 'none'; 
+            document.getElementById('choice-screen').style.display = 'block'; 
+        }
+
+        // 下面是原来的功能，保持不变
+        function choosePay() { 
+            document.getElementById('choice-screen').style.display = 'none'; 
+            document.getElementById('payment-screen').style.display = 'block'; 
+            document.getElementById('pay-amount').textContent = currentAmount;
+            startPayProgress(); 
+        }
+
+        function chooseEdge() { 
+            document.getElementById('choice-screen').style.display = 'none'; 
+            document.getElementById('progress-screen').style.display = 'block'; 
+            document.getElementById('progress-title').textContent = "寸止中 (10秒)"; 
+            startEdgeProgress(); 
+        }
+
+        function startEdgeProgress() {
+            let timeLeft = 10;
+            const bar = document.getElementById('progress-bar');
+            const text = document.getElementById('progress-text');
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft -= 0.1;
+                const percent = ((10 - timeLeft) / 10) * 100;
+                bar.style.width = percent + "%";
+                text.textContent = timeLeft.toFixed(1) + " 秒";
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert("继续叭傻逼🖕🏻");
+                    document.getElementById('progress-screen').style.display = 'none';
+                    document.getElementById('game-screen').style.display = 'block';
+                }
+            }, 100);
+        }
+
+        function startPayProgress() {
+            let timeLeft = 30;
+            const bar = document.getElementById('pay-progress-bar');
+            const text = document.getElementById('pay-progress-text');
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft -= 0.1;
+                const percent = ((30 - timeLeft) / 30) * 100;
+                bar.style.width = percent + "%";
+                text.textContent = timeLeft.toFixed(1) + " 秒";
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    alert("时间到！没支付就想射？垃圾🖕🏻");
+                    document.getElementById('payment-screen').style.display = 'none';
+                    document.getElementById('game-screen').style.display = 'block';
+                }
+            }, 100);
+        }
+
+        function startBigCountdown() {
+            document.getElementById('payment-screen').style.display = 'none';
+            document.getElementById('countdown-screen').style.display = 'block';
+            let count = 10;
+            const el = document.getElementById('big-countdown');
+            timer = setInterval(() => {
+                count--;
+                el.textContent = count;
+                if (count <= 0) {
+                    clearInterval(timer);
+                    let msg = currentAmount < 30 ? "真是废物🖕🏻，才坚持不到30下，阳痿的傻逼🖕🏻" : 
+                             currentAmount < 60 ? "垃圾！不到60下就射，比种猪还废物呢～🖤" : 
+                             currentAmount < 100 ? "啧，是个还不错的废物🖕🏻但是谁知道你是不是初始金额比较高呢？～🖤" : 
+                             "还不错，坚持的挺久，但是100多下很厉害嘛？不一样还是垃圾嘛～🖤";
+                    alert("🎉 射精成功！\n\n" + msg + "\n贡金：" + currentAmount);
+                    if (confirm("再玩一次？")) location.reload();
+                }
+            }, 800);
+        }
+    </script>
+</body>
+</html>
