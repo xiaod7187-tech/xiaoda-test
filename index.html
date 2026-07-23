@@ -126,18 +126,20 @@
             <button onclick="startRecordingScreen()" class="start-btn">开始游戏</button>
         </div>
 
-        <!-- 录音界面 -->
         <div id="recording-screen" style="display:none;">
             <h1>🖤 录音环节 🖤</h1>
-            <p><strong>第一段录音：</strong> 请说出“XXX傻逼”</p>
-            <button id="start-record1-btn" onclick="startRecording(1)" style="background:linear-gradient(#7c3aed,#6d28d9); color:white;">🎤 开始录制傻逼</button>
-            <button id="done1-btn" onclick="finishRecording(1)" style="display:none; background:#22c55e; color:white;">✅ 第一段录制完成</button>
+            
+            <p><strong>第一段：</strong> 请说出“XXX傻逼”</p>
+            <button id="start-record1-btn" onclick="startRecording(1)" style="background:linear-gradient(#7c3aed,#6d28d9); color:white;">🎤 开始录音</button>
+            <button id="stop-record1-btn" onclick="stopRecording()" style="display:none; background:#ef4444; color:white;">⏹ 停止录音</button>
+            <button id="done1-btn" onclick="finishRecording(1)" style="display:none; background:#22c55e; color:white;">✅ 第一段完成</button>
 
-            <p style="margin:25px 0 10px;"><strong>第二段录音：</strong> 录制磕头声</p>
-            <button id="start-record2-btn" onclick="startRecording(2)" style="background:linear-gradient(#dc2626,#b91c1c); color:white;">🎤 开始录制磕头声</button>
-            <button id="done2-btn" onclick="finishRecording(2)" style="display:none; background:#22c55e; color:white;">✅ 第二段录制完成</button>
+            <p style="margin:25px 0 10px;"><strong>第二段：</strong> 录制磕头声</p>
+            <button id="start-record2-btn" onclick="startRecording(2)" style="background:linear-gradient(#dc2626,#b91c1c); color:white;">🎤 开始录音</button>
+            <button id="stop-record2-btn" onclick="stopRecording()" style="display:none; background:#ef4444; color:white;">⏹ 停止录音</button>
+            <button id="done2-btn" onclick="finishRecording(2)" style="display:none; background:#22c55e; color:white;">✅ 第二段完成</button>
 
-            <p id="record-status" style="margin:20px 0; min-height:28px; font-weight:bold;"></p>
+            <p id="record-status" style="margin:15px 0; min-height:28px; font-weight:bold;"></p>
             
             <button id="play-test-btn" onclick="playRecording()" style="display:none;">▶ 试听当前录音</button>
             <button id="confirm-btn" onclick="confirmRecording()" style="display:none;">✅ 全部完成，进入游戏</button>
@@ -203,8 +205,8 @@
         let timer;
         let mediaRecorder;
         let audioChunks = [];
-        let audioUrl1 = null; // 傻逼录音
-        let audioUrl2 = null; // 磕头声
+        let audioUrl1 = null;
+        let audioUrl2 = null;
         let currentType = 1;
 
         function showRules() { 
@@ -231,35 +233,43 @@
                     if (type === 1) {
                         audioUrl1 = url;
                         document.getElementById('start-record1-btn').style.display = 'none';
+                        document.getElementById('stop-record1-btn').style.display = 'none';
                         document.getElementById('done1-btn').style.display = 'block';
                     } else {
                         audioUrl2 = url;
                         document.getElementById('start-record2-btn').style.display = 'none';
+                        document.getElementById('stop-record2-btn').style.display = 'none';
                         document.getElementById('done2-btn').style.display = 'block';
                     }
-                    document.getElementById('record-status').textContent = '✅ 录音完成，可以试听';
+                    document.getElementById('record-status').textContent = '✅ 录音完成';
                     document.getElementById('play-test-btn').style.display = 'block';
-                    checkCanConfirm();
+                    if (audioUrl1 && audioUrl2) document.getElementById('confirm-btn').style.display = 'block';
                 };
 
                 mediaRecorder.start();
-                document.getElementById('record-status').textContent = type === 1 ? '🎤 正在录制“XXX傻逼”...' : '🎤 正在录制磕头声...';
+                document.getElementById('record-status').textContent = type === 1 ? '🎤 正在录音... 请说“XXX傻逼”' : '🎤 正在录制磕头声...';
+                
+                // 显示停止按钮
+                if (type === 1) {
+                    document.getElementById('stop-record1-btn').style.display = 'block';
+                } else {
+                    document.getElementById('stop-record2-btn').style.display = 'block';
+                }
             } catch (err) {
                 alert("无法访问麦克风，请允许权限后刷新重试");
             }
         }
 
-        function finishRecording(type) {
-            if (type === 1) currentType = 1;
-            else currentType = 2;
-            document.getElementById('record-status').textContent = '已标记完成';
-            checkCanConfirm();
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
         }
 
-        function checkCanConfirm() {
-            if (audioUrl1 && audioUrl2) {
-                document.getElementById('confirm-btn').style.display = 'block';
-            }
+        function finishRecording(type) {
+            currentType = type;
+            document.getElementById('record-status').textContent = type === 1 ? '第一段已标记完成' : '第二段已标记完成';
+            if (audioUrl1 && audioUrl2) document.getElementById('confirm-btn').style.display = 'block';
         }
 
         function playRecording() {
