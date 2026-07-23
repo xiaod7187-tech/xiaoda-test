@@ -55,6 +55,12 @@
             background: #a855f7; 
             color: white; 
         }
+        .die-btn {
+            background: linear-gradient(#b91c1c, #991b1b);
+            color: white;
+            font-weight: bold;
+            border: 2px solid #f87171;
+        }
         .amount { 
             font-size: 52px; 
             font-weight: bold; 
@@ -74,6 +80,7 @@
             object-fit: contain; 
             border-radius: 16px; 
             margin: 15px 0; 
+            cursor: pointer;
         }
         .progress-container { 
             width: 100%; 
@@ -96,12 +103,6 @@
             margin: 40px 0; 
             text-shadow: 0 0 30px #ec4899; 
         }
-        .die-btn {
-            background: linear-gradient(#b91c1c, #991b1b);
-            color: white;
-            font-weight: bold;
-            border: 2px solid #f87171;
-        }
     </style>
 </head>
 <body>
@@ -123,19 +124,27 @@
             <button onclick="startRecordingScreen()" class="start-btn">开始游戏</button>
         </div>
 
-        <!-- 新增录音界面 -->
+        <!-- 录音界面（两个录音） -->
         <div id="recording-screen" style="display:none;">
             <h1>🖤 录音环节 🖤</h1>
-            <p><strong>请大声清晰地说出：</strong></p>
-            <p style="font-size:22px; color:#f472b6; margin:20px 0;">“我是傻逼”</p>
             
-            <button id="start-record-btn" class="record-btn" onclick="startRecording()" style="background:linear-gradient(#dc2626,#b91c1c); color:white;">🎤 开始录音</button>
-            <button id="stop-record-btn" class="record-btn" onclick="stopRecording()" style="display:none; background:linear-gradient(#dc2626,#b91c1c); color:white;">⏹ 停止录音</button>
-            
-            <p id="record-status" style="margin:15px 0; min-height:28px;"></p>
-            
-            <button id="play-test-btn" onclick="playRecording()" style="display:none;">▶ 试听录音</button>
-            <button id="confirm-btn" onclick="confirmRecording()" style="display:none;">✅ 确认使用这个录音</button>
+            <div style="margin:25px 0;">
+                <p><strong>1. 请大声说出：</strong></p>
+                <p style="font-size:20px; color:#f472b6;">“我是傻逼”</p>
+            </div>
+
+            <div style="margin:25px 0;">
+                <p><strong>2. 请录制磕头声</strong></p>
+                <p style="color:#c4a1ff;">（可以敲桌子或真的磕头）</p>
+            </div>
+
+            <button id="start-record1-btn" onclick="startRecording(1)" style="background:linear-gradient(#7c3aed,#6d28d9); color:white;">🎤 录制我是傻逼</button>
+            <button id="start-record2-btn" onclick="startRecording(2)" style="background:linear-gradient(#dc2626,#b91c1c); color:white; margin-top:8px;">🎤 录制磕头声</button>
+
+            <p id="record-status" style="margin:20px 0; min-height:30px; font-weight:bold;"></p>
+
+            <button id="play-test-btn" onclick="playRecording()" style="display:none;">▶ 试听当前录音</button>
+            <button id="confirm-btn" onclick="confirmRecording()" style="display:none;">✅ 确认两个录音都完成</button>
         </div>
 
         <div id="start-screen" style="display:none;">
@@ -148,10 +157,10 @@
         </div>
 
         <div id="game-screen" style="display:none;">
-            <img src="https://i.postimg.cc/13w7pkDJ/Picsart-26-07-13-20-47-11-492.png" class="mystery-img" alt="小妲">
+            <img src="https://i.postimg.cc/13w7pkDJ/Picsart-26-07-13-20-47-11-492.png" class="mystery-img" id="mystery-img" alt="小妲">
             <p>当前贡金</p>
             <div class="amount" id="amount">0</div>
-            <button class="fap" onclick="fap()">🦌 一下 (+1)</button>
+            <button class="fap" onclick="fap()">🦌 一下 (+0.1)</button>
             <button class="die-btn" onclick="dieMom()">死妈 (贡金翻倍)</button>
             <button class="cum" onclick="wantCum()">想💦</button>
         </div>
@@ -198,8 +207,11 @@
         let timer;
         let mediaRecorder;
         let audioChunks = [];
-        let recordedAudioBlob = null;
-        let audioUrl = null;
+        let recordedAudio1 = null;  // 我是傻逼
+        let recordedAudio2 = null;  // 磕头声
+        let currentRecordingType = 1;
+        let audioUrl1 = null;
+        let audioUrl2 = null;
 
         function showRules() { 
             document.getElementById('disclaimer-screen').style.display = 'none'; 
@@ -211,7 +223,8 @@
             document.getElementById('recording-screen').style.display = 'block';
         }
 
-        async function startRecording() {
+        async function startRecording(type) {
+            currentRecordingType = type;
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 mediaRecorder = new MediaRecorder(stream);
@@ -219,40 +232,40 @@
 
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.onstop = () => {
-                    recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    audioUrl = URL.createObjectURL(recordedAudioBlob);
-                    document.getElementById('start-record-btn').style.display = 'none';
-                    document.getElementById('stop-record-btn').style.display = 'none';
-                    document.getElementById('play-test-btn').style.display = 'block';
-                    document.getElementById('confirm-btn').style.display = 'block';
-                    document.getElementById('record-status').textContent = '✅ 录音完成！';
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    if (type === 1) {
+                        recordedAudio1 = blob;
+                        audioUrl1 = url;
+                    } else {
+                        recordedAudio2 = blob;
+                        audioUrl2 = url;
+                    }
+                    
+                    document.getElementById('record-status').textContent = type === 1 ? 
+                        '✅ “我是傻逼”录音完成' : '✅ “磕头声”录音完成';
                 };
 
                 mediaRecorder.start();
-                document.getElementById('start-record-btn').style.display = 'none';
-                document.getElementById('stop-record-btn').style.display = 'block';
-                document.getElementById('record-status').textContent = '🎤 正在录音... 请说“我是傻逼”';
+                document.getElementById('record-status').textContent = type === 1 ? 
+                    '🎤 正在录“我是傻逼”...' : '🎤 正在录磕头声...';
             } catch (err) {
-                alert("无法访问麦克风，请允许权限后刷新重试");
-            }
-        }
-
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.stop();
+                alert("麦克风权限被拒绝，请允许后重试");
             }
         }
 
         function playRecording() {
-            if (audioUrl) {
-                const audio = new Audio(audioUrl);
+            let url = currentRecordingType === 1 ? audioUrl1 : audioUrl2;
+            if (url) {
+                const audio = new Audio(url);
                 audio.play();
             }
         }
 
         function confirmRecording() {
-            if (!recordedAudioBlob) {
-                alert("请先完成录音");
+            if (!recordedAudio1 || !recordedAudio2) {
+                alert("请完成两个录音！");
                 return;
             }
             document.getElementById('recording-screen').style.display = 'none';
@@ -267,15 +280,24 @@
         }
 
         function updateAmount() { 
-            document.getElementById('amount').textContent = currentAmount; 
+            document.getElementById('amount').textContent = currentAmount.toFixed(1); 
         }
 
         function fap() { 
-            currentAmount += 1; 
+            currentAmount += 0.1; 
             updateAmount();
-            // 每次点击🦌播放录音
-            if (audioUrl) {
-                const audio = new Audio(audioUrl);
+            if (audioUrl1) {
+                const audio = new Audio(audioUrl1);
+                audio.play().catch(() => {});
+            }
+        }
+
+        // 点击图片播放磕头声 +1
+        function playKowtow() {
+            currentAmount += 1;
+            updateAmount();
+            if (audioUrl2) {
+                const audio = new Audio(audioUrl2);
                 audio.play().catch(() => {});
             }
         }
@@ -285,7 +307,7 @@
                 alert("还没开始贡金呢，先🦌几下吧～");
                 return;
             }
-            currentAmount = Math.floor(currentAmount * 2);
+            currentAmount = Math.round(currentAmount * 2 * 10) / 10;
             updateAmount();
             alert("恭喜，死妈快乐！");
         }
@@ -298,7 +320,7 @@
         function choosePay() { 
             document.getElementById('choice-screen').style.display = 'none'; 
             document.getElementById('payment-screen').style.display = 'block'; 
-            document.getElementById('pay-amount').textContent = currentAmount;
+            document.getElementById('pay-amount').textContent = currentAmount.toFixed(1);
             startPayProgress(); 
         }
 
@@ -361,11 +383,17 @@
                              currentAmount < 60 ? "垃圾！不到60下就射，比种猪还废物呢～🖤" : 
                              currentAmount < 100 ? "啧，是个还不错的废物🖕🏻但是谁知道你是不是初始金额比较高呢？～🖤" : 
                              "还不错，坚持的挺久，但是100多下很厉害嘛？不一样还是垃圾嘛～🖤";
-                    alert("🎉 射精成功！\n\n" + msg + "\n贡金：" + currentAmount);
+                    alert("🎉 射精成功！\n\n" + msg + "\n贡金：" + currentAmount.toFixed(1));
                     if (confirm("再玩一次？")) location.reload();
                 }
             }, 800);
         }
+
+        // 绑定图片点击事件
+        window.onload = function() {
+            const img = document.getElementById('mystery-img');
+            if (img) img.addEventListener('click', playKowtow);
+        };
     </script>
 </body>
 </html>
